@@ -73,7 +73,7 @@ def get_all_from_jira(page_size, page_number, filter, sort_by):
         entry["jbrowse_link"] = f""
         entries.append(entry)
 
-    print({'total': entries_len, 'data': entries})
+    return {'total': entries_len, 'data': entries}
 
 def get_record_from_jira(id):
     return get_all_from_jira(1, 1, f'[id={id}]', 'id')[0]
