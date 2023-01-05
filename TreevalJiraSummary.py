@@ -5,9 +5,9 @@ import JiraMethods as jm
 
 jql_field_map = {"tolid": "'Sample ID'",
                 "species_name": "'Species Name'",
-                "jira_ticket": "key",
-                "last_updated": "updated",
-                "jbrowse_hyperlink": "'Datatype Available'" } # Last to be updated when correct field available in JIRA
+                "jira_issue": "key",
+                "jira_issue_last_updated": "updated",
+                "jbrowse_link": "'Datatype Available'" } # Last to be updated when correct field available in JIRA
 
 def add_contains_str_filter(filter_dict, field_key):
     field_value = filter_dict.get(field_key,"")
@@ -50,9 +50,16 @@ def get_all_from_jira(page_size, page_number, filter, sort_by):
     # Return all results for page until the number requested.
     results = tja.auth_jira.search_issues(jql_request, maxResults=page_size*page_number)
 
-    # Filter down to selected page (last returned).
-    num_entries_on_last_page = len(results) % page_size if not 0 else page_size
-    filtered_jira_results = results[-num_entries_on_last_page:]
+    entries_len = len(results)
+    offset = page_size * (page_number - 1)
+
+    page_first_row = offset + 1 
+    page_last_row = offset + page_size
+
+    if entries_len < page_last_row:
+        filtered_jira_results = results[page_first_row-1:entries_len]
+    else:
+        filtered_jira_results = results[page_first_row-1:page_last_row]
 
     entries = []
     for i in filtered_jira_results:
@@ -60,14 +67,13 @@ def get_all_from_jira(page_size, page_number, filter, sort_by):
         entry = {}
         entry["tolid"] = jm.get_species_id(issue)
         entry["species_name"] = jm.get_species_name(issue)
-        entry["jira_ticket"] = issue.key
-        entry["jira_ticket_hyperlink"] = f"{tja.jira_path}/browse/{issue.key}"
-        entry["last_updated"] = issue.fields.updated
-        entry["jbrowse_availability"] = False
-        entry["jbrowse_hyperlink"] = f""
+        entry["jira_issue"] = issue.key
+        entry["jira_issue_link"] = f"{tja.jira_path}/browse/{issue.key}"
+        entry["jira_issue_last_updated"] = issue.fields.updated
+        entry["jbrowse_link"] = f""
+        entry["max"] = entries_len
+        entry["offset"] = offset
         entries.append(entry)
-
-    print(entries)
 
     return entries
 
@@ -75,7 +81,7 @@ def get_record_from_jira(id):
     return get_all_from_jira(1, 1, f'[id={id}]', 'id')[0]
 
 def main():
-    get_all_from_jira(10, 1, f'[]', 'last_updated')
+    get_all_from_jira(5, 2, f'[]', 'jira_issue')
 
 if __name__ == "__main__":
     main()
