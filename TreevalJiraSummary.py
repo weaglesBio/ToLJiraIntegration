@@ -42,9 +42,9 @@ def apply_filter_sort_to_jql(jql, filter, sort_by):
 
     return jql
 
-def get_all_from_jira(page_size, page_number, filter, sort_by):
+def get_all_from_jira(page_size, page_number, filter, sort_by, password_eagles):
 
-    tja = ToLJiraAuth()
+    tja = ToLJiraAuth(password = password_eagles)
     jql_request = apply_filter_sort_to_jql("project in (GRIT,RC)", filter, sort_by)
 
     # Return all results for page until the number requested.
@@ -75,11 +75,13 @@ def get_all_from_jira(page_size, page_number, filter, sort_by):
 
     return {'total': entries_len, 'data': entries}
 
-def get_record_from_jira(id):
-    return get_all_from_jira(1, 1, f'[id={id}]', 'id')[0]
+def get_record_from_jira(id, password_eagles):
+    return get_all_from_jira(1, 1, f'[id={id}]', 'id', password_eagles)[0]
 
 def main():
-    get_all_from_jira(5, 2, f'[]', 'jira_issue')
+    print(get_all_from_jira(5, 2, f'[]', 'jira_issue',""))
+    
+
 
 if __name__ == "__main__":
     main()

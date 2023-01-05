@@ -27,6 +27,7 @@ class ToLJiraAuth:
         elif username and password:
             self.authorise_login(username, password)
         elif password:
+            print("a")
             self.authorise_token(password)
         else:
             print(f"No suitable credentials provided for access.")
